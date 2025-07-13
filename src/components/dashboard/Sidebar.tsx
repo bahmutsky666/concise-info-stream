@@ -11,9 +11,18 @@ import {
   Star,
   Image,
   FileImage,
-  MoreHorizontal
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import { Button } from "@/components/ui/button";
+import { SidebarCustomizer } from "./SidebarCustomizer";
+import { useState } from "react";
 
 const navigationItems = [
   { icon: Home, label: "Home", isActive: true },
@@ -40,95 +49,186 @@ const smartCollections = [
 ];
 
 export function Sidebar() {
+  const {
+    isCollapsed,
+    showResources,
+    showFavourites,
+    showAITools,
+    showSmartCollections,
+    sidebarWidth,
+    compactMode,
+    toggleCollapse
+  } = useSidebarStore();
+  
+  const [showCustomizer, setShowCustomizer] = useState(false);
+
+  const getItemClasses = (isActive?: boolean) => cn(
+    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer transition-all duration-200",
+    compactMode ? "py-1.5" : "py-2",
+    isActive 
+      ? "bg-primary text-primary-foreground shadow-glow" 
+      : "text-muted-foreground hover:text-foreground hover:bg-hover-accent"
+  );
+
+  const sectionHeaderClasses = cn(
+    "text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 flex items-center justify-between",
+    compactMode ? "mb-1" : "mb-2"
+  );
+
   return (
-    <div className="w-64 bg-sidebar border-r border-border h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">W</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground">No workspace selected</p>
-            <p className="text-xs text-muted-foreground">Select a workspace</p>
+    <>
+      <div 
+        className={cn(
+          "bg-sidebar border-r border-border h-screen flex flex-col transition-all duration-300 relative",
+          isCollapsed ? "w-16" : `w-[${sidebarWidth}px]`
+        )}
+        style={{ width: isCollapsed ? '64px' : `${sidebarWidth}px` }}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">W</span>
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground truncate">No workspace selected</p>
+                <p className="text-xs text-muted-foreground truncate">Select a workspace</p>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="flex-1 p-4 space-y-6">
-        {/* Main Navigation */}
-        <div className="space-y-1">
-          {navigationItems.map((item) => (
-            <div
-              key={item.label}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer transition-all duration-200",
-                item.isActive 
-                  ? "bg-primary text-primary-foreground shadow-glow" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-hover-accent"
-              )}
+        {/* Collapse Toggle */}
+        <div className="absolute -right-3 top-20 z-10">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-6 w-6 p-0 rounded-full border shadow-sm"
+            onClick={toggleCollapse}
+          >
+            {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
+          </Button>
+        </div>
+
+        {/* Settings Button */}
+        {!isCollapsed && (
+          <div className="absolute top-4 right-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={() => setShowCustomizer(true)}
             >
-              <item.icon className="w-4 h-4" />
-              <span>{item.label}</span>
-              {item.hasSubmenu && (
-                <div className="ml-auto">
-                  <div className="w-1 h-1 bg-current rounded-full"></div>
+              <Settings className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className={cn("flex-1 p-4 space-y-6 overflow-y-auto", compactMode && "space-y-4")}>
+          {/* Main Navigation */}
+          {showResources && (
+            <div className="space-y-1">
+              {!isCollapsed && (
+                <div className={sectionHeaderClasses}>
+                  <span>Navigation</span>
                 </div>
               )}
+              {navigationItems.map((item) => (
+                <div key={item.label} className={getItemClasses(item.isActive)}>
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  {!isCollapsed && (
+                    <>
+                      <span className="truncate">{item.label}</span>
+                      {item.hasSubmenu && (
+                        <div className="ml-auto">
+                          <div className="w-1 h-1 bg-current rounded-full"></div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* Favourites */}
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Favourites
-          </h3>
-          <div className="space-y-1">
-            {/* Empty state for favourites */}
-            <p className="text-xs text-muted-foreground px-3 py-2">
-              No favourites yet
-            </p>
-          </div>
-        </div>
-
-        {/* AI and Tools */}
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            AI and Tools
-          </h3>
-          <div className="space-y-1">
-            {aiToolsItems.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer text-muted-foreground hover:text-foreground hover:bg-hover-accent transition-all duration-200"
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
+          {/* Favourites */}
+          {showFavourites && (
+            <div>
+              {!isCollapsed && (
+                <h3 className={sectionHeaderClasses}>
+                  <span>Favourites</span>
+                  <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                    <Star className="w-3 h-3" />
+                  </Button>
+                </h3>
+              )}
+              <div className="space-y-1">
+                {isCollapsed ? (
+                  <div className="flex justify-center py-2">
+                    <Star className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground px-3 py-2">
+                    No favourites yet
+                  </p>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )}
 
-        {/* Smart Collections */}
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Smart Collections
-          </h3>
-          <div className="space-y-1">
-            {smartCollections.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer text-muted-foreground hover:text-foreground hover:bg-hover-accent transition-all duration-200"
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
+          {/* AI and Tools */}
+          {showAITools && (
+            <div>
+              {!isCollapsed && (
+                <h3 className={sectionHeaderClasses}>
+                  <span>AI and Tools</span>
+                  <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                    <Bot className="w-3 h-3" />
+                  </Button>
+                </h3>
+              )}
+              <div className="space-y-1">
+                {aiToolsItems.map((item) => (
+                  <div key={item.label} className={getItemClasses()}>
+                    <item.icon className="w-4 h-4 flex-shrink-0" />
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Smart Collections */}
+          {showSmartCollections && (
+            <div>
+              {!isCollapsed && (
+                <h3 className={sectionHeaderClasses}>
+                  <span>Smart Collections</span>
+                  <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                    <FolderOpen className="w-3 h-3" />
+                  </Button>
+                </h3>
+              )}
+              <div className="space-y-1">
+                {smartCollections.map((item) => (
+                  <div key={item.label} className={getItemClasses()}>
+                    <item.icon className="w-4 h-4 flex-shrink-0" />
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Customizer Panel */}
+      <SidebarCustomizer 
+        open={showCustomizer} 
+        onClose={() => setShowCustomizer(false)} 
+      />
+    </>
   );
 }
