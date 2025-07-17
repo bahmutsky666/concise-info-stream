@@ -57,6 +57,8 @@ export function Sidebar() {
     showSmartCollections,
     sidebarWidth,
     compactMode,
+    colorTheme,
+    customColor,
     toggleCollapse
   } = useSidebarStore();
   
@@ -75,14 +77,35 @@ export function Sidebar() {
     compactMode ? "mb-1" : "mb-2"
   );
 
+  const getSidebarBackground = () => {
+    switch (colorTheme) {
+      case 'purple':
+        return 'bg-sidebar-theme-purple';
+      case 'green':
+        return 'bg-sidebar-theme-green';
+      case 'orange':
+        return 'bg-sidebar-theme-orange';
+      case 'red':
+        return 'bg-sidebar-theme-red';
+      case 'custom':
+        return customColor ? '' : 'bg-sidebar';
+      default:
+        return 'bg-sidebar';
+    }
+  };
+
   return (
     <>
       <div 
         className={cn(
-          "bg-sidebar border-r border-border h-screen flex flex-col transition-all duration-300 relative",
+          "border-r border-border h-screen flex flex-col transition-all duration-300 relative",
+          getSidebarBackground(),
           isCollapsed ? "w-16" : `w-[${sidebarWidth}px]`
         )}
-        style={{ width: isCollapsed ? '64px' : `${sidebarWidth}px` }}
+        style={{ 
+          width: isCollapsed ? '64px' : `${sidebarWidth}px`,
+          backgroundColor: colorTheme === 'custom' && customColor ? customColor : undefined
+        }}
       >
         {/* Header */}
         <div className="p-4 border-b border-border">

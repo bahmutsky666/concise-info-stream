@@ -60,7 +60,11 @@ export default {
 					accent: 'hsl(var(--sidebar-accent))',
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+					ring: 'hsl(var(--sidebar-ring))',
+					'theme-purple': 'hsl(var(--sidebar-theme-purple))',
+					'theme-green': 'hsl(var(--sidebar-theme-green))',
+					'theme-orange': 'hsl(var(--sidebar-theme-orange))',
+					'theme-red': 'hsl(var(--sidebar-theme-red))'
 				},
 				'card-hover': 'hsl(var(--card-hover))',
 				'hover-accent': 'hsl(var(--hover-accent))'

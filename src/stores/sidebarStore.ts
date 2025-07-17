@@ -9,13 +9,17 @@ interface SidebarSettings {
   showSmartCollections: boolean;
   sidebarWidth: number;
   compactMode: boolean;
+  colorTheme: 'default' | 'purple' | 'green' | 'orange' | 'red' | 'custom';
+  customColor?: string;
 }
 
 interface SidebarStore extends SidebarSettings {
   toggleCollapse: () => void;
-  toggleSection: (section: keyof Omit<SidebarSettings, 'isCollapsed' | 'sidebarWidth' | 'compactMode'>) => void;
+  toggleSection: (section: keyof Omit<SidebarSettings, 'isCollapsed' | 'sidebarWidth' | 'compactMode' | 'colorTheme' | 'customColor'>) => void;
   setSidebarWidth: (width: number) => void;
   toggleCompactMode: () => void;
+  setColorTheme: (theme: SidebarSettings['colorTheme']) => void;
+  setCustomColor: (color: string) => void;
   resetToDefaults: () => void;
 }
 
@@ -27,6 +31,8 @@ const defaultSettings: SidebarSettings = {
   showSmartCollections: true,
   sidebarWidth: 256,
   compactMode: false,
+  colorTheme: 'default',
+  customColor: undefined,
 };
 
 export const useSidebarStore = create<SidebarStore>()(
@@ -37,6 +43,8 @@ export const useSidebarStore = create<SidebarStore>()(
       toggleSection: (section) => set((state) => ({ [section]: !state[section] })),
       setSidebarWidth: (width) => set({ sidebarWidth: width }),
       toggleCompactMode: () => set((state) => ({ compactMode: !state.compactMode })),
+      setColorTheme: (theme) => set({ colorTheme: theme }),
+      setCustomColor: (color) => set({ customColor: color }),
       resetToDefaults: () => set(defaultSettings),
     }),
     {

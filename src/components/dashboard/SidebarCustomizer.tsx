@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X, RotateCcw, Palette, Layout, Sliders } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -5,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 interface SidebarCustomizerProps {
   open: boolean;
@@ -19,14 +21,34 @@ export function SidebarCustomizer({ open, onClose }: SidebarCustomizerProps) {
     showSmartCollections,
     sidebarWidth,
     compactMode,
+    colorTheme,
+    customColor,
     toggleSection,
     setSidebarWidth,
     toggleCompactMode,
+    setColorTheme,
+    setCustomColor,
     resetToDefaults
   } = useSidebarStore();
+  
+  const [tempCustomColor, setTempCustomColor] = useState(customColor || '#1a1b23');
 
   const handleWidthChange = (value: number[]) => {
     setSidebarWidth(value[0]);
+  };
+
+  const colorThemes = [
+    { name: "Default", value: "default" as const, color: "hsl(240, 6%, 10%)" },
+    { name: "Purple", value: "purple" as const, color: "hsl(259, 94%, 10%)" },
+    { name: "Green", value: "green" as const, color: "hsl(142, 76%, 8%)" },
+    { name: "Orange", value: "orange" as const, color: "hsl(25, 95%, 8%)" },
+    { name: "Red", value: "red" as const, color: "hsl(0, 84%, 8%)" },
+  ];
+
+  const handleCustomColorChange = (color: string) => {
+    setTempCustomColor(color);
+    setCustomColor(color);
+    setColorTheme('custom');
   };
 
   const sections = [
@@ -115,6 +137,56 @@ export function SidebarCustomizer({ open, onClose }: SidebarCustomizerProps) {
             </div>
           </div>
 
+          <Separator />
+          
+          {/* Color Theme */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Palette className="w-4 h-4" />
+              Color Theme
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {colorThemes.map((theme) => (
+                <Button
+                  key={theme.value}
+                  variant={colorTheme === theme.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setColorTheme(theme.value)}
+                  className="justify-start gap-2"
+                >
+                  <div 
+                    className="w-3 h-3 rounded-full border border-border"
+                    style={{ backgroundColor: theme.color }}
+                  />
+                  {theme.name}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Custom Color</Label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={tempCustomColor}
+                  onChange={(e) => handleCustomColorChange(e.target.value)}
+                  className="w-12 h-8 rounded border border-border bg-transparent cursor-pointer"
+                />
+                <Button
+                  variant={colorTheme === 'custom' ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setColorTheme('custom')}
+                  className="flex-1"
+                >
+                  Use Custom
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Quick Presets */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -171,7 +243,8 @@ export function SidebarCustomizer({ open, onClose }: SidebarCustomizerProps) {
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• Use the collapse button to quickly hide/show the sidebar</li>
               <li>• Compact mode is great for smaller screens</li>
-              <li>• Disable unused sections to reduce clutter</li>
+              <li>• Color themes persist across sessions</li>
+              <li>• Custom colors support full accessibility</li>
               <li>• Settings are automatically saved</li>
             </ul>
           </div>
